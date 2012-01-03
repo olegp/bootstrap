@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# instantiate - instantiates a new instance
+# SYNOPSIS: instantiate [EC2_INSTANCE_TYPE] [EC2_REGION]
+# DESCRIPTION: instantiates a new EC2 instance on AWS and echos its hostname
+
+# get optional instance type and region from params
+EC2_INSTANCE_TYPE=${1}
+EC2_REGION=${2}
+
+set -u # prevent unbound variables
+set -e # terminate on error
+
+# use convention over configuration
+: ${EC2_PRIVATE_KEY:="./config/pk.pem"}
+: ${EC2_CERT:="./config/cert.pem"}
+: ${EC2_SECURITY_GROUP:="default"}
+: ${EC2_KEYPAIR:="default"}
+: ${SSH_KEY:="./config/default.pem"}
+
+# provide a default region
+if [ ! -n "$EC2_REGION" ]; then
+  EC2_REGION=us-east-1
+fi
+
+# default to micro instances
+if [ ! -n "$EC2_INSTANCE_TYPE" ]; then
+  EC2_INSTANCE_TYPE=t1.micro
+fi
+
+# set Ubuntu LTS AMI ID based on instance type & region
+if [ "$EC2_REGION" == "us-east-1" ]; then
+case "$EC2_INSTANCE_TYPE" in
+  t1.micro|m1.small) AMI_ID=ami-ab36fbc2
+    ;;
+  m1.large) AMI_ID=ami-ad36fbc4
+    ;;
+esac
+fi
+
+if [ "$EC2_REGION" == "eu-west-1" ]; then
+case "$EC2_INSTANCE_TYPE" in
+  t1.micro|m1.small) AMI_ID=ami-c00e3cb4
+    ;;
+  m1.large) AMI_ID=ami-cc0e3cb8
+    ;;
+esac
+fi
+
+ID=$(ec2-run-instances --g $EC2_SECURITY_GROUP --key $EC2_KEYPAIR -K $EC2_PRIVATE_KEY -C $EC2_CERT $AMI_ID --instance-type $EC2_INSTANCE_TYPE --region $EC2_REGION | grep INSTANCE | cut -f2)
+if [ ! -n "$ID" ]; then
+  exit 1
+fi
+# keep querying AWS until we get a hostname back
+HOST=""
+while [ ! -n "$HOST" ]; do
+HOST=$(ec2-describe-instances -K $EC2_PRIVATE_KEY -C $EC2_CERT --region $EC2_REGION $ID | grep INSTANCE | cut -f4)
+done
+# wait for SSH server on port 22 to start
+#while ! nc localhost 22 <<< '' | grep SSH &> /dev/null; do sleep 1; done
+while ! ssh -q -o "StrictHostKeyChecking no" -o "BatchMode=yes" -o "ConnectTimeout 10" -i $SSH_KEY ubuntu@$HOST "echo 2>&1"; do sleep 1; done
+echo $HOST
+
+

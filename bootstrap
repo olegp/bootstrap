@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# bootstrap - bootstraps an instance
+# SYNOPSIS: bootstrap IDENTITY_FILE USER@HOST[:PORT] SCRIPT...
+# DESCRIPTION: resolves scripts via BS_PATH and runs them locally to build up a script that runs remotely on HOST
+
+set -u # prevent unbound variables
+set -e # terminate on error
+
+# extract SSH host
+HOST=$1
+
+# use convention over configuration
+: ${SSH_KEY:="./config/default.pem"}
+
+# add default username if missing
+if [[ $HOST != *@* ]]; then
+  HOST="ubuntu@$HOST"
+fi
+
+# set lookup path if unset
+: ${BS_PATH:="./:./scripts/:./bootstrap/scripts/"}
+
+# perform lookup
+resolve () {
+  arr=$(echo $2 | tr ":" "\n")
+  for x in $arr
+  do
+  FILE="$x/$1"
+  if [ -f $FILE ];
+  then
+    echo $FILE
+    return 0
+  fi
+  done
+  echo "'$1' not found in '$2'" >&2
+  exit 1
+}
+
+# this array contains the script that will be run remotely
+SCRIPT=("set -u" "set -e" "sudo -E su")
+
+# runs the command(s) remotely
+run() {
+  for ((i = 1; i <= $#; i++)); do
+    SCRIPT+=("${!i}")
+  done
+}
+
+#TODO include once?
+
+# runs the script(s) remotely, script(s) is looked up in BS_PATH
+script() {
+  for ((i = 1; i <= $#; i++)); do
+    FILE=$(resolve "${!i}" $BS_PATH)
+    SCRIPT+=("$(cat $FILE)")
+  done
+}
+
+# copies a local file to a remote location
+put() {
+	FILE=$(resolve "$1" $BS_PATH)
+	SCRIPT+=("cat << EOF > $2")
+	SCRIPT+=("$(cat $FILE)")
+	SCRIPT+=("EOF")
+	if [ -n "$3" ]; then
+		run "chown $3 $2"
+	fi
+	if [ -n "$4" ]; then
+		run "chmod $4 $2"
+	fi
+} 
+
+# runs the script(s) locally
+include() {
+  for ((i = 1; i <= $#; i++)); do
+    FILE=$(resolve "${!i}" $BS_PATH)
+		source $FILE    
+  done
+}
+
+# include all scripts passed in as parameters
+for ((i = 2; i <= $#; i++)); do
+	include "${!i}"
+done
+
+IFS=$'\n'
+#TODO improve debug mode configuration
+if [ "$HOST" = "ubuntu@stdout" ]; then
+  echo -e "${SCRIPT[*]}"
+else
+# run merged result remotely
+#TODO improve error reporting
+#TODO ssh connection retry
+	echo -e "${SCRIPT[*]}" | ssh -o "StrictHostKeyChecking no" -i $SSH_KEY $HOST "cat | bash /dev/stdin"
+fi
+
