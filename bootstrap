@@ -62,12 +62,14 @@ put() {
 	SCRIPT+=("cat << EOF > $2")
 	SCRIPT+=("$(cat $FILE)")
 	SCRIPT+=("EOF")
+	set +u
 	if [ -n "$3" ]; then
 		run "chown $3 $2"
 	fi
 	if [ -n "$4" ]; then
 		run "chmod $4 $2"
 	fi
+	set -u
 } 
 
 # runs the script(s) locally
