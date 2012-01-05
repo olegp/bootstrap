@@ -66,7 +66,7 @@ The following function are available inside the role scripts:
   * **include SCRIPT...** - includes one or more other scripts that are run on the client; scripts are looked up in BS_PATH
   * **run COMMAND...** - adds one or more commands to be run on the server, with the Bash variables set on the client
   * **script SCRIPT...** - adds one or more scripts to be run on the server, with the Bash variables set on the server; scripts are looked up in BS_PATH
-  * **put FILE PATH [CHOWN] [CHMOD]** - puts a local file on the remote server, optionally setting the user:group and permissions
+  * **put FILE PATH [CHOWN] [CHMOD]** - puts a local file on the remote server, optionally setting the user:group and permissions; the Bash variables are set on the server
 
 ### License 
 
