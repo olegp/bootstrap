@@ -56,12 +56,28 @@ script() {
   done
 }
 
-# copies a local file to a remote location
+# copies a local file to a remote location, populates variables
 put() {
 	FILE=$(resolve "$1" $BS_PATH)
-	SCRIPT+=("cat << EOF > $2")
+	SCRIPT+=("cat << BSEOF > $2")
 	SCRIPT+=("$(cat $FILE)")
-	SCRIPT+=("EOF")
+	SCRIPT+=("BSEOF")
+	set +u
+	if [ -n "$3" ]; then
+		run "chown $3 $2"
+	fi
+	if [ -n "$4" ]; then
+		run "chmod $4 $2"
+	fi
+	set -u
+}
+
+# copies a local script to a remote location, does not populate variables
+puts() {
+	FILE=$(resolve "$1" $BS_PATH)
+	SCRIPT+=("cat << 'BSEOF' > $2")
+	SCRIPT+=("$(cat $FILE)")
+	SCRIPT+=("BSEOF")
 	set +u
 	if [ -n "$3" ]; then
 		run "chown $3 $2"
@@ -71,6 +87,7 @@ put() {
 	fi
 	set -u
 } 
+
 
 # runs the script(s) locally
 include() {
