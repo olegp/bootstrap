@@ -6,6 +6,7 @@
 # get optional instance type and region from params
 EC2_INSTANCE_TYPE=${1}
 EC2_REGION=${2}
+EC2_ZONE=${3}
 
 set -u # prevent unbound variables
 set -e # terminate on error
