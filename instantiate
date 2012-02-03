@@ -22,6 +22,10 @@ if [ ! -n "$EC2_REGION" ]; then
   EC2_REGION=us-east-1
 fi
 
+if [ ! -n "$EC2_ZONE" ]; then
+  EC2_ZONE=us-east-1c
+fi
+
 # default to micro instances
 if [ ! -n "$EC2_INSTANCE_TYPE" ]; then
   EC2_INSTANCE_TYPE=t1.micro
@@ -46,7 +50,7 @@ case "$EC2_INSTANCE_TYPE" in
 esac
 fi
 
-ID=$(ec2-run-instances --g $EC2_SECURITY_GROUP --key $EC2_KEYPAIR -K $EC2_PRIVATE_KEY -C $EC2_CERT $AMI_ID --instance-type $EC2_INSTANCE_TYPE --region $EC2_REGION | grep INSTANCE | cut -f2)
+ID=$(ec2-run-instances --g $EC2_SECURITY_GROUP --key $EC2_KEYPAIR -K $EC2_PRIVATE_KEY -C $EC2_CERT $AMI_ID --instance-type $EC2_INSTANCE_TYPE --region $EC2_REGION --availability-zone $EC2_ZONE  | grep INSTANCE | cut -f2)
 if [ ! -n "$ID" ]; then
   exit 1
 fi
