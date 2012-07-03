@@ -35,18 +35,18 @@ fi
 # set Ubuntu LTS AMI ID based on instance type & region
 if [ "$EC2_REGION" == "us-east-1" ]; then
 case "$EC2_INSTANCE_TYPE" in
-  t1.micro|m1.small) AMI_ID=ami-ab36fbc2
+  t1.micro) AMI_ID=ami-82fa58eb
     ;;
-  m1.medium|m1.large) AMI_ID=ami-ad36fbc4
+  m1.small|m1.medium|m1.large) AMI_ID=ami-eafa5883
     ;;
 esac
 fi
 
 if [ "$EC2_REGION" == "eu-west-1" ]; then
 case "$EC2_INSTANCE_TYPE" in
-  t1.micro|m1.small) AMI_ID=ami-c00e3cb4
+  t1.micro) AMI_ID=ami-ab9491df
     ;;
-  m1.medium|m1.large) AMI_ID=ami-cc0e3cb8
+  m1.small|m1.medium|m1.large) AMI_ID=ami-b39491c7
     ;;
 esac
 fi
