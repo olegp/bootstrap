@@ -74,7 +74,7 @@ put() {
 
 # appends the text provided to a remote file
 append() {
-  SCRIPT+=("grep -q '$1' $2 && echo '$1' >> $2")
+  SCRIPT+=("echo '$1' >> $2")
 }
 
 # copies a local script to a remote location, does not populate variables
