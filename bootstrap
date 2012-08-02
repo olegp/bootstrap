@@ -12,11 +12,6 @@ HOST=$1
 # use convention over configuration
 : ${SSH_KEY:="./config/default.pem"}
 
-# add default username if missing
-if [[ $HOST != *@* ]]; then
-  HOST="ubuntu@$HOST"
-fi
-
 # set lookup path if unset
 : ${BS_PATH:="./:./scripts/:./bootstrap/scripts/"}
 
@@ -103,8 +98,13 @@ include() {
 }
 
 # include all scripts passed in as parameters
-for ((i = 2; i <= $#; i++)); do
-	include "${!i}"
+for ((i = 2; i <= $#; i++)); do    
+  if [ "${!i}" = "-c" ]; then
+    i=$[$i+1]
+    SCRIPT+=("${!i}")
+  else
+    include "${!i}"
+  fi	
 done
 
 IFS=$'\n'
@@ -112,9 +112,17 @@ IFS=$'\n'
 if [ "$HOST" = "ubuntu@stdout" ]; then
   echo -e "${SCRIPT[*]}"
 else
+
 # run merged result remotely
 #TODO improve error reporting
 #TODO ssh connection retry
-	echo -e "${SCRIPT[*]}" | ssh -o "StrictHostKeyChecking no" -i $SSH_KEY $HOST "cat | bash /dev/stdin"
+for host in $(echo $HOST | tr "," "\n")
+do
+  # add default username if missing
+  if [[ $host != *@* ]]; then
+    host="ubuntu@$host"
+  fi
+  echo -e "${SCRIPT[*]}" | ssh -q -o "StrictHostKeyChecking no" -i $SSH_KEY $host "cat | bash /dev/stdin"
+done
 fi
 

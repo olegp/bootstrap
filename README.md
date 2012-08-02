@@ -68,6 +68,20 @@ The following function are available inside the role scripts:
   * **script SCRIPT...** - adds one or more scripts to be run on the server, with the Bash variables set on the server; scripts are looked up in BS_PATH
   * **put FILE PATH [CHOWN] [CHMOD]** - puts a local file on the remote server, optionally setting the user:group and permissions; the Bash variables are set on the server
 
+### Bootstrap Options
+
+It is possible to run the `bootstrap` command against more than one server by specifying them in a comma separated list, e.g.:
+
+    ./bootstrap/bootstrap alpha,beta test
+
+It is also possible to run a single command remotely, as follows:
+
+    ./bootstrap/bootstrap alpha -c "date"
+
+These can be combined to run a single command on multiple instances:
+
+    ./bootstrap/bootstrap alpha,beta -c "date" 
+
 ### License 
 
 (The MIT License)
