@@ -32,7 +32,11 @@ resolve () {
 }
 
 # this array contains the script that will be run remotely
-SCRIPT=("set -u" "set -e" "sudo -E su")
+if [ "$HOST" = "stdout" ]; then
+  SCRIPT=()
+else
+  SCRIPT=("set -u" "set -e" "sudo -E su")
+fi
 
 # runs the command(s) remotely
 run() {
