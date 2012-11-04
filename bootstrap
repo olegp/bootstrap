@@ -109,7 +109,7 @@ done
 
 IFS=$'\n'
 #TODO improve debug mode configuration
-if [ "$HOST" = "ubuntu@stdout" ]; then
+if [ "$HOST" = "stdout" ]; then
   echo -e "${SCRIPT[*]}"
 else
 
