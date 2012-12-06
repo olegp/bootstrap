@@ -23,7 +23,7 @@ Install Bootstrap with `git clone git://github.com/olegp/bootstrap.git`.
 In the AWS Management Console, click your name in the upper right and select "[Security Credentials](https://aws-portal.amazon.com/gp/aws/developer/account/index.html?ie=UTF8&action=access-keyp_endpoint)". 
 Click the "X.509 Certificates" tab and "Create a new Certificate". Download the two certificate files to the `config` directory and rename them from `pk-XXXX.pem` to `pk.pem` & `cert-XXXX.pem` to `cert.pem`.
 
-Back in the Management Console, select the EC2 tab, "NETWORK & SECURITY", "Keypairs". Create a new keypair named "default" and save it to the `config` directory as well. Make sure this private key has the right permissions set with `chmod 700 config/default.pem`.
+Back in the Management Console, select the EC2 tab, "NETWORK & SECURITY", "Keypairs". Create a new keypair named "default" and save it to the `config` directory as well. Make sure this private key has the right permissions set with `chmod 600 config/default.pem`.
 
 Also, make sure that your `default` security group allows inbound SSH connections. To do this, select Security Groups on the left, then select the `default` group in the main view, then the Inbound tab below. Next to "Create a new rule" select "SSH" in the dropdown, then "Add Rule" and "Apply Rule Changes".
 
